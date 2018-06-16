@@ -3,6 +3,7 @@ The Axios framework makes use of [SFML](https://www.sfml-dev.org/). The Axios fr
 
 ## What does it do
 The framework serves a role in the following subjects:
+> If you want to read more about these subjects, go to the [projects page](https://antjowie.github.io/projects/axios-framework/)
 - [ ] **Game loop**
     - [ ] Update Input handler
     - [ ] Render
