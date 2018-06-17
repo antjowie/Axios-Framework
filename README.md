@@ -3,7 +3,7 @@ The Axios framework makes use of [SFML](https://www.sfml-dev.org/). The Axios fr
 
 ## What does it do
 The framework serves a role in the following subjects:
-> Progress of these subject are being followed at the [projects page](https://antjowie.github.io/projects/axios-framework/). This list could be outdated. For the latest changes, check the [projects page](https://antjowie.github.io/projects/axios-framework/).
+> Progress of these subject are being followed at the [project's page](https://antjowie.github.io/projects/axios-framework/). This list could be outdated. For the latest changes, check the [project's page](https://antjowie.github.io/projects/axios-framework/).
 - **Game instance**
     - Manage user settings
     - Manage (de)initialization of modules
