@@ -3,13 +3,11 @@ The Axios framework makes use of [SFML](https://www.sfml-dev.org/). The Axios fr
 
 ## What does it do
 The framework serves a role in the following subjects:
-> If you want to read more about these subjects or follow their progression, go to the [projects page](https://antjowie.github.io/projects/axios-framework/)
+> Progress of these subject are being followed at the [project's page](https://antjowie.github.io/projects/axios-framework/). This list could be outdated. For the latest changes, check the [project's page](https://antjowie.github.io/projects/axios-framework/).
 - **Game instance**
-    - Manage data paths
     - Manage user settings
-- **Game loop**
-    - Update Input handler
-    - Render
+    - Manage (de)initialization of modules
+    - Game loop
 - **Scene manager**  
     _Scenes are containers that contain objects and sometimes static level data. A section can be the main menu, level, options menu, loading screen etc_  
     - One frame stack
@@ -23,12 +21,13 @@ The framework serves a role in the following subjects:
     - Animation handling
     - Collision and Physics
     - Object serialization
-- **Assets management**  
-    _Basic data containers for game assets_
+- **Data manager**  
+    _Basic data containers for game data that has to be saved_
     - Sound
     - Music
     - Images
     - Fonts
+    - User config
     - Asynchronous
 - **String hashing (will probably be done by another library)**
 - **Tiled support**  
@@ -36,3 +35,9 @@ The framework serves a role in the following subjects:
 - **Input handler**
     - Keyboard and mouse
     - Controller
+- **Parsers and Converters**
+    - JSON parser
+    - XML parser
+    - SFML key code converter
+- **Specialized containers**
+    - Average
