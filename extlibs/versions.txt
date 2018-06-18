@@ -1,0 +1,2 @@
+SFML 2.5.0 - https://www.sfml-dev.org/
+nlohmann/json 3.1.2 - https://github.com/nlohmann/json
