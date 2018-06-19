@@ -2,18 +2,13 @@
 #include "Axios/InputHandler.h"
 #include "Axios/DataManager.h"
 
-
 #include <SFML/System/Clock.hpp>
 #include <SFML/Window/Event.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 
-#include <list>
-#include <fstream>
-#include <sstream>
-#include <iostream>
-
 float getAverage(const std::list<float> & list)
 {
+	
 	float total{ 0 };
 	for (const auto &ms : list)
 		total += ms;
@@ -64,16 +59,14 @@ void ax::Instance::start()
 void ax::Instance::init()
 {
 	ax::DataManager::Config().load("config/config.json");
-	ax::DataManager::Config().check("windowX", "1280");
-	ax::DataManager::Config().check("windowY", "720");
+	ax::DataManager::Config().check("windowX", std::to_string(sf::VideoMode().getDesktopMode().width));
+	ax::DataManager::Config().check("windowY", std::to_string(sf::VideoMode().getDesktopMode().height));
+	ax::DataManager::Config().check("bbp", std::to_string(sf::VideoMode().getDesktopMode().bitsPerPixel));
 	ax::DataManager::Config().check("refreshRate", "144");
 	ax::DataManager::Config().check("title", "Axios Framework");
 	
 	ax::DataManager::GameKey().load("config/keybindings.json");
-	ax::DataManager::GameKey().check("up", { sf::Keyboard::Space, -1 });
-	ax::DataManager::GameKey().check("left", { sf::Keyboard::A, -1 });
-	ax::DataManager::GameKey().check("right", { sf::Keyboard::D, -1 });
-	// Init ax::InputHandler with correct data
+	ax::DataManager::GameKey().check();
 }
 
 void ax::Instance::deinit()
