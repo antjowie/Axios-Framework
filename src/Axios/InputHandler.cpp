@@ -1,4 +1,5 @@
 #include "Axios/InputHandler.h"
+#include "Axios/Logger.h"
 
 #include <SFML/Window/Event.hpp>
 
@@ -66,66 +67,33 @@ bool ax::InputHandler::isAnyKeyPressed() const
 	return m_anyKeyPressed;
 }
 
-bool ax::InputHandler::isKeyPressed(const int keyName) const
+const ax::InputHandler::KeyState& ax::InputHandler::getKey(const int keyName) const
 {
-	return m_keys[keyName].isPressed;
+	return m_keys[keyName];
 }
 
-bool ax::InputHandler::isKeyHold(const int keyName) const
+const ax::InputHandler::KeyState& ax::InputHandler::getButton(const int buttonName) const
 {
-	return m_keys[keyName].isHold;
+	return m_buttons[buttonName];
+}
+const ax::InputHandler::KeyState ax::InputHandler::getItem(const KeyItem &item, const char* name) const
+{
+	if (item[0] != item[1])
+	{
+		if (item[0] != -1)
+			return getKey(item[0]);
+		else if (item[1] != -1)
+			return getKey(item[1]);
+	}
+	Logger::log(std::string("[WARN] InputHandler: item " + std::string(name) + " doesn't exist").c_str(), 5);
+	return ax::InputHandler::KeyState();
 }
 
-bool ax::InputHandler::isKeyReleased(const int keyName) const
+const ax::InputHandler::KeyState ax::InputHandler::getItem(const char* name) const
 {
-	return m_keys[keyName].isReleased;
-}
-
-bool ax::InputHandler::isButtonPressed(const int buttonName) const
-{
-	return m_buttons[buttonName].isPressed;
-}
-
-bool ax::InputHandler::isButtonHold(const int buttonName) const
-{
-	return m_buttons[buttonName].isHold;
-}
-
-bool ax::InputHandler::isButtonReleased(const int buttonName) const
-{
-	return m_buttons[buttonName].isReleased;
-}
-
-bool ax::InputHandler::isItemPressed(const KeyItem &item) const
-{
-	if (item[0] != -1)
-		return isKeyPressed(static_cast<sf::Keyboard::Key>(item[0]));
-	else if (item[1] != -1)
-		return isButtonPressed(static_cast<sf::Mouse::Button>(item[1]));
-	return false;
-}
-
-bool ax::InputHandler::isItemHold(const KeyItem &item) const
-{
-	if (item[0] != -1)
-		return isKeyHold(static_cast<sf::Keyboard::Key>(item[0]));
-	else if (item[1] != -1)
-		return isButtonHold(static_cast<sf::Mouse::Button>(item[1]));
-	return false;
-}
-
-bool ax::InputHandler::isItemReleased(const KeyItem &item) const
-{
-	if (item[0] != -1)
-		return isKeyReleased(static_cast<sf::Keyboard::Key>(item[0]));
-	else if (item[1] != -1)
-		return isButtonReleased(static_cast<sf::Mouse::Button>(item[1]));
-	return false;
+	return getItem(ax::DataManager::GameKey().data[name],name);
 }
 
 ax::InputHandler::InputHandler()
 {
-	m_keys.resize(sf::Keyboard::KeyCount);
-	m_buttons.resize(sf::Mouse::ButtonCount);
 }
-

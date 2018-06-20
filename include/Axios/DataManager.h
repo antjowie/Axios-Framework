@@ -1,11 +1,9 @@
 #pragma once
 #include <nlohmann/json.hpp>
 
-#include <array>
 #include <fstream>
 #include <unordered_map>
 
-// index 0 = keyboard, 1 = mouse
 using KeyItem = std::array<int, 2>;
 
 namespace ax
@@ -31,7 +29,7 @@ namespace ax
 			void check(const bool force = false);
 			void load(const char* path);
 			void save(const char* path);
-		
+
 			Data(const callbackFunction &extraCheck);
 		};
 		

@@ -3,8 +3,9 @@
 
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Window/Keyboard.hpp>
+#include <SFML/Window/Mouse.hpp>
 
-#include <vector>
+#include <array>
 
 namespace ax
 {
@@ -19,8 +20,8 @@ namespace ax
 		};
 
 		// These vectors are filled with all the keys and their state
-		std::vector<KeyState> m_keys;
-		std::vector<KeyState> m_buttons;
+		std::array<KeyState, sf::Keyboard::KeyCount> m_keys;
+		std::array<KeyState, sf::Mouse::ButtonCount> m_buttons;
 		bool m_anyKeyPressed;
 
 		InputHandler();
@@ -32,32 +33,23 @@ namespace ax
 		bool isAnyKeyPressed() const;
 
 		// Used to check individual key
-		bool isKeyPressed(const int keyName) const;
-		// Used to check individual key						  
-		bool isKeyHold(const int keyName) const;
-		// Used to check individual key						  
-		bool isKeyReleased(const int keyName) const;
-
+		const KeyState &getKey(const int keyName) const;
+		
 		// Used to check individual button
-		bool isButtonPressed(const int buttonName) const;
-		// Used to check individual button							 
-		bool isButtonHold(const int buttonName) const;
-		// Used to check individual button							 
-		bool isButtonReleased(const int buttonName) const;
-
+		const KeyState &getButton(const int buttonName) const;
+		
 		// Used to check item from config
-		bool isItemPressed(const KeyItem &item) const;
-		// Used to check item from config
-		bool isItemHold(const KeyItem &item) const;
-		// Used to check item from config
-		bool isItemReleased(const KeyItem &item) const;
+		const KeyState getItem(const KeyItem &item, const char* name = "NO_NAME") const;
+		// Calls the dataManager internally
+		const KeyState getItem(const char* name) const;
 
 		static InputHandler &getInstance();
 	};
 
+	// This namespace contains functions to map SFML enumerators to strings
 	namespace InputName
 	{
-		const std::string KeyboardToString(const int key);
-		const std::string MouseToString(const int button);
+		const char* keyToString(const int key);
+		const char* buttonToString(const int button);
 	}
 }
