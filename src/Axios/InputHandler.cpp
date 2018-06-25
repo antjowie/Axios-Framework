@@ -9,7 +9,7 @@ ax::InputHandler& ax::InputHandler::getInstance()
 	return instance;
 }
 
-void ax::InputHandler::update(sf::RenderWindow & window, sf::Event &event)
+void ax::InputHandler::_update(sf::RenderWindow & window, sf::Event &event)
 {
 	m_anyKeyPressed = false;
 
@@ -85,7 +85,7 @@ const ax::InputHandler::KeyState ax::InputHandler::getItem(const KeyItem &item, 
 		else if (item[1] != -1)
 			return getKey(item[1]);
 	}
-	Logger::log(std::string("[WARN] InputHandler: item " + std::string(name) + " doesn't exist").c_str(), 5);
+	Logger::log(std::string("[Axios WARN] InputHandler: item " + std::string(name) + " doesn't exist").c_str(), 5);
 	return ax::InputHandler::KeyState();
 }
 

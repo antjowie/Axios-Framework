@@ -28,7 +28,7 @@ namespace ax
 
 	public:
 		// Uses an event from the game loop to not skip events
-		void update(sf::RenderWindow & window, sf::Event &event);
+		void _update(sf::RenderWindow & window, sf::Event &event);
 
 		bool isAnyKeyPressed() const;
 

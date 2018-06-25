@@ -24,11 +24,11 @@ namespace ax
 			std::unordered_map<std::string, T> data;
 			
 			// Used for the callback function
-			void check(const char* name, const T &value, const bool force = false);
+			void _check(const char* name, const T &value, const bool force = false);
 			// Used to check whole file
-			void check(const bool force = false);
-			void load(const char* path);
-			void save(const char* path);
+			void _check(const bool force = false);
+			void _load(const char* path);
+			void _save(const char* path);
 
 			Data(const callbackFunction &extraCheck);
 		};
@@ -39,20 +39,20 @@ namespace ax
 	};
 
 	template<class T>
-	inline void DataManager::Data<T>::check(const char * name, const T &value, const bool force)
+	inline void DataManager::Data<T>::_check(const char * name, const T &value, const bool force)
 	{
 		if (force || data.count(name) == 0)
 			data[name] = value;
 	}
 
 	template<class T>
-	inline void DataManager::Data<T>::check(const bool force)
+	inline void DataManager::Data<T>::_check(const bool force)
 	{
 		m_extraCheck(force);
 	}
 
 	template<class T>
-	inline void DataManager::Data<T>::load(const char * path)
+	inline void DataManager::Data<T>::_load(const char * path)
 	{
 		std::ifstream configFile(path);
 		json config;
@@ -67,7 +67,7 @@ namespace ax
 			data[it.key()] = it.value().get<T>();
 	}
 	template<class T>
-	inline void DataManager::Data<T>::save(const char * path)
+	inline void DataManager::Data<T>::_save(const char * path)
 	{
 		std::ofstream configFile(path, std::ios::trunc);
 		json config(data);

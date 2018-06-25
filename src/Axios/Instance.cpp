@@ -39,20 +39,20 @@ void ax::Instance::start()
 {
 	// Init phase
 	// Load config data
-	ax::DataManager::Config().load("config/config.json");
-	ax::DataManager::GameKey().load("config/keybindings.json");
+	ax::DataManager::Config()._load("config/config.json");
+	ax::DataManager::GameKey()._load("config/keybindings.json");
 
 	// Check framework related config
-	ax::DataManager::Config().check("title", "No title");
-	ax::DataManager::Config().check("verbosity", "10");
+	ax::DataManager::Config()._check("title", "No title");
+	ax::DataManager::Config()._check("verbosity", "10");
 
 	// Check user related config
-	ax::DataManager::Config().check("windowX", std::to_string(sf::VideoMode().getDesktopMode().width));
-	ax::DataManager::Config().check("windowY", std::to_string(sf::VideoMode().getDesktopMode().height));
-	ax::DataManager::Config().check("fullscreen", "0");
-	ax::DataManager::Config().check("refreshRate", "144");
+	ax::DataManager::Config()._check("windowX", std::to_string(sf::VideoMode().getDesktopMode().width));
+	ax::DataManager::Config()._check("windowY", std::to_string(sf::VideoMode().getDesktopMode().height));
+	ax::DataManager::Config()._check("fullscreen", "0");
+	ax::DataManager::Config()._check("refreshRate", "144");
 
-	ax::DataManager::GameKey().check();
+	ax::DataManager::GameKey()._check();
 
 	setTitle(ax::DataManager::Config().data["title"].c_str(), false);
 	updateUserConfig();
@@ -77,7 +77,7 @@ void ax::Instance::start()
 
 		if (elapsedTime >= 1.f / m_refreshRate)
         {
-			ax::InputHandler::getInstance().update(m_window,event);   
+			ax::InputHandler::getInstance()._update(m_window,event);   
 			averageTime.push_front(elapsedTime);
 			if (averageTime.size() > 5) // Max elements
 				averageTime.pop_back();
@@ -95,8 +95,8 @@ void ax::Instance::start()
 
 	// -----
 	// Deinit phase
-	ax::DataManager::Config().save("config/config.json");
-	ax::DataManager::GameKey().save("config/keybindings.json");
+	ax::DataManager::Config()._save("config/config.json");
+	ax::DataManager::GameKey()._save("config/keybindings.json");
 }
 
 ax::Instance & ax::Instance::getInstance()
