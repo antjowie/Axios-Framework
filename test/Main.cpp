@@ -10,7 +10,7 @@ int main()
 		ax::DataManager::GameKey().check("right",{sf::Keyboard::D, -1 }, force);
 	});
 
-	ax::Instance::start();
-	
+	ax::Instance::getInstance().start();
+
 	return 0;
 }

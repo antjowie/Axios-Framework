@@ -71,7 +71,7 @@ namespace ax
 	{
 		std::ofstream configFile(path, std::ios::trunc);
 		json config(data);
-		configFile << config.dump();
+		configFile << config.dump(2);
 		configFile.close();
 	}
 
