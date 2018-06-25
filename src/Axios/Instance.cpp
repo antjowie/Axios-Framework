@@ -6,8 +6,6 @@
 #include <SFML/Window/Event.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 
-#include <iostream>
-
 float getAverage(const std::list<float> & list)
 {
 	float total{ 0 };
@@ -51,15 +49,13 @@ void ax::Instance::start()
 
 		// If user were to change the refreshRate, If std::stof is to expansive
 		// write a struct with int and string and convert during loading
-		refreshRate = std::stof(ax::DataManager::Config().data["refreshRate"]);
-        
-		std::cout << ax::InputHandler::getInstance().getItem("test").isPressed;
+		refreshRate = std::stof(ax::DataManager::Config().data["refreshRate"]);        
 
 		if (elapsedTime >= 1.f / refreshRate)
         {
 			ax::InputHandler::getInstance().update(window,event);   
 			averageTime.push_front(elapsedTime);
-			if (averageTime.size() > 25) // Max elements
+			if (averageTime.size() > 5) // Max elements
 				averageTime.pop_back();
 
             elapsedTime = std::fmod(elapsedTime, 1.f / refreshRate);
