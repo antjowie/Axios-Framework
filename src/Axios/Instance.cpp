@@ -43,14 +43,14 @@ void ax::Instance::start()
 	ax::DataManager::GameKey()._load("config/keybindings.json");
 
 	// Check framework related config
-	ax::DataManager::Config()._check("title", "No title");
-	ax::DataManager::Config()._check("verbosity", "10");
+	ax::DataManager::Config().check("title", "No title");
+	ax::DataManager::Config().check("verbosity", "10");
 
 	// Check user related config
-	ax::DataManager::Config()._check("windowX", std::to_string(sf::VideoMode().getDesktopMode().width));
-	ax::DataManager::Config()._check("windowY", std::to_string(sf::VideoMode().getDesktopMode().height));
-	ax::DataManager::Config()._check("fullscreen", "0");
-	ax::DataManager::Config()._check("refreshRate", "144");
+	ax::DataManager::Config().check("windowX", std::to_string(sf::VideoMode().getDesktopMode().width));
+	ax::DataManager::Config().check("windowY", std::to_string(sf::VideoMode().getDesktopMode().height));
+	ax::DataManager::Config().check("fullscreen", "0");
+	ax::DataManager::Config().check("refreshRate", "144");
 
 	ax::DataManager::GameKey()._check();
 

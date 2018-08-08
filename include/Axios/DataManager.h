@@ -11,7 +11,7 @@ namespace ax
 	class DataManager
 	{
 	private:
-		using callbackFunction = void(*)(const bool force);
+		using callbackFunction = void(*)(const bool overwrite);
 		using json = nlohmann::json;
 		
 		template <class T>
@@ -23,32 +23,47 @@ namespace ax
 		public:
 			std::unordered_map<std::string, T> data;
 			
-			// Used for the callback function
-			void _check(const char* name, const T &value, const bool force = false);
+			// Call this function in the callback function (extraCheck)
+			void check(const char* name, const T &value, const bool overwrite = false);
+			
 			// Used to check whole file
-			void _check(const bool force = false);
+			// Called when the file is loaded to 
+			// see if nothing is corrupted or missing
+			void _check(const bool overwrite = false);
+			
+			// Import data from path
 			void _load(const char* path);
+
+			// Export data to path
 			void _save(const char* path);
 
+			// Override this to add custom configurations to check
+			// Use the check function in the callback body
+			// The callbackFunction should return void and take one bool as parameter
+			// The bool is used when two configurations overlap, overwrite will
+			// overwrite the configuration
 			Data(const callbackFunction &extraCheck);
 		};
 		
 	public:
+		// This container contains all the conigurations of the game
 		static Data<std::string>& Config(const callbackFunction &extraCheck = nullptr);
+		
+		// This container contains all the keybinding of the user
 		static Data<KeyItem>& GameKey(const callbackFunction &extraCheck = nullptr);
 	};
 
 	template<class T>
-	inline void DataManager::Data<T>::_check(const char * name, const T &value, const bool force)
+	inline void DataManager::Data<T>::check(const char * name, const T &value, const bool overwrite)
 	{
-		if (force || data.count(name) == 0)
+		if (overwrite || data.count(name) == 0)
 			data[name] = value;
 	}
 
 	template<class T>
-	inline void DataManager::Data<T>::_check(const bool force)
+	inline void DataManager::Data<T>::_check(const bool overwrite)
 	{
-		m_extraCheck(force);
+		m_extraCheck(overwrite);
 	}
 
 	template<class T>
