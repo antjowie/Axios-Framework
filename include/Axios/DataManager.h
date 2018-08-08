@@ -11,14 +11,16 @@ namespace ax
 	class DataManager
 	{
 	private:
-		using callbackFunction = void(*)(const bool overwrite);
+		using extraCheck = void(*)(const bool overwrite);
 		using json = nlohmann::json;
 		
+		// The data container contains the basic structure for every config type
+		// It is also able to serialize the data
 		template <class T>
 		class Data
 		{
 		private:
-			callbackFunction m_extraCheck;
+			extraCheck m_extraCheck;
 	
 		public:
 			std::unordered_map<std::string, T> data;
@@ -39,18 +41,20 @@ namespace ax
 
 			// Override this to add custom configurations to check
 			// Use the check function in the callback body
-			// The callbackFunction should return void and take one bool as parameter
+			// The extraCheck should return void and take one bool as parameter
 			// The bool is used when two configurations overlap, overwrite will
 			// overwrite the configuration
-			Data(const callbackFunction &extraCheck);
+			Data(const extraCheck &extraCheck);
 		};
 		
 	public:
-		// This container contains all the conigurations of the game
-		static Data<std::string>& Config(const callbackFunction &extraCheck = nullptr);
+		// This container contains all the configurations of the game
+		// extraCheck = void (const bool)
+		static Data<std::string>& Config(const extraCheck &extraCheck = nullptr);
 		
+		// extraCheck = void (const bool)
 		// This container contains all the keybinding of the user
-		static Data<KeyItem>& GameKey(const callbackFunction &extraCheck = nullptr);
+		static Data<KeyItem>& GameKey(const extraCheck &extraCheck = nullptr);
 	};
 
 	template<class T>
@@ -91,7 +95,7 @@ namespace ax
 	}
 
 	template<class T>
-	inline DataManager::Data<T>::Data(const callbackFunction & extraCheck):
+	inline DataManager::Data<T>::Data(const extraCheck & extraCheck):
 		m_extraCheck(extraCheck)
 	{
 	}

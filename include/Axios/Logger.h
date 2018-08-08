@@ -4,7 +4,13 @@ namespace ax
 {
 	namespace Logger
 	{
-		// The lower the verbosity, the more important the message is
-		void log(const char* message, const int verbosity);
+		// Format: [%projectName% %messageType%] %className%: %message%
+		// verbosity, importance, the lower, the more important
+		// message, the message to log
+		// projectName, name of the project (Axios)
+		// messageType, type of message (Error, Warn)
+		// className, name of the class (Instance)
+		void log(const int verbosity, const char* message, const char *projectName = "null",
+			const char *messageType = "null", const char *className = "null");
 	}
 }

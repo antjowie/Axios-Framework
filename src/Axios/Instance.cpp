@@ -1,6 +1,7 @@
 #include "Axios/Instance.h"
 #include "Axios/InputHandler.h"
 #include "Axios/DataManager.h"
+#include "Axios/Logger.h"
 
 #include <SFML/System/Clock.hpp>
 #include <SFML/Window/Event.hpp>
@@ -103,4 +104,21 @@ ax::Instance & ax::Instance::getInstance()
 {
 	static Instance instance;
 	return instance;
+}
+
+ax::UpdateLoopObject::UpdateLoopObject(const UpdateLoopType updateLoopType, callbackUpdateLoopFunction & function)
+{
+	switch (updateLoopType)
+	{
+	case UpdateLoopType::Real:
+		m_updateLoop = ax::
+		break;
+	case UpdateLoopType::Physics:
+		break;
+	default:
+		Logger::log(0, "UpdateLoopType not specified", "Axios", "ERROR", "UpdateLoopObject");
+		break;
+	}
+
+
 }
