@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-void ax::Logger::log(const int verbosity, const char * message, const char * projectName, const char * messageType, const char * className)
+void ax::Logger::log(const int verbosity, const char * message, const char * projectName, const MessageType messageType, const char * className)
 {
 	if (verbosity > std::stoi(DataManager::Config().data["verbosity"]))
 		return;
@@ -14,8 +14,19 @@ void ax::Logger::log(const int verbosity, const char * message, const char * pro
 	string.append(projectName);
 	string.append(" ");
 
-	std::string str(messageType);
-	std::transform(str.begin(), str.end(), str.begin(), ::toupper);
+	std::string str;
+	switch (messageType)
+	{
+	case ERROR:
+		str = "ERROR";
+		break;
+	case WARNING:
+		str = "WARNING";
+		break;
+	case INFO:
+		str = "INFO";
+		break;
+	}
 	string.append(str);
 
 	string.append("] ");

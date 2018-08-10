@@ -6,6 +6,8 @@
 #include <SFML/System/Clock.hpp>
 #include <SFML/Window/Event.hpp>
 
+#include <sstream>
+
 float getAverage(const std::list<float> & list)
 {
 	float total{ 0 };
@@ -53,7 +55,7 @@ void ax::Instance::start()
 	ax::DataManager::Config().check("fullscreen", "0");
 	ax::DataManager::Config().check("refreshRate", "144");
 
-	ax::DataManager::GameKey()._check();
+	ax::DataManager::GameKey()._check(false);
 
 	setTitle(ax::DataManager::Config().data["title"].c_str(), false);
 	updateUserConfig();
@@ -106,19 +108,75 @@ ax::Instance & ax::Instance::getInstance()
 	return instance;
 }
 
-ax::UpdateLoopObject::UpdateLoopObject(const UpdateLoopType updateLoopType, callbackUpdateLoopFunction & function)
+void ax::UpdateLoopObject::operator()(const float elapsedTime)
 {
+	m_function(elapsedTime);
+}
+
+ax::UpdateLoopObject::UpdateLoopObject(const UpdateLoopType updateLoopType, updateLoopFunction & function):
+	m_destroyed(false)
+{
+	// Get the correct update loop
 	switch (updateLoopType)
 	{
 	case UpdateLoopType::Real:
-		m_updateLoop = ax::
+		m_updateLoop = &ax::Instance::getInstance().m_realUpdateLoop;
 		break;
 	case UpdateLoopType::Physics:
+		m_updateLoop = &ax::Instance::getInstance().m_physicsUpdateLoop;
 		break;
 	default:
-		Logger::log(0, "UpdateLoopType not specified", "Axios", "ERROR", "UpdateLoopObject");
+		Logger::log(0, "UpdateLoopType not specified", "Axios", ax::Logger::ERROR, "UpdateLoopObject");
 		break;
 	}
+	// Push the object into the update loop
+	m_updateLoop->m_update.push_back(*this);
 
+	// Test code
+	std::stringstream ss;
+	ss << static_cast<const void*>(this);
+	ax::Logger::log(0, ss.str().c_str(), "Axios", ax::Logger::INFO, "UpdateLoopObject");
+}
 
+ax::UpdateLoopObject::~UpdateLoopObject()
+{
+	m_destroyed = true;
+}
+
+void ax::Instance::UpdateLoop::_update(const float elapsedTime)
+{
+	m_elapsedTime += elapsedTime;
+	
+	// Checks if objects should be updated
+	if (m_interval != 0 && m_elapsedTime == std::fmod(m_elapsedTime, m_interval))
+		return;
+	
+	const float modulo = (m_interval == 0) ? m_elapsedTime : m_interval;
+	
+	do
+	{
+		for (auto iter : m_update)
+		{
+			iter.get().m_function(modulo);
+
+			// Temp code
+			std::stringstream ss;
+			ss << static_cast<const void*>(&iter.get());
+			ax::Logger::log(0, ss.str().c_str(), "Axios", ax::Logger::INFO, "UpdateLoop");
+		}
+		m_elapsedTime -= modulo;
+	} while (m_elapsedTime > modulo);
+}
+
+void ax::Instance::UpdateLoop::_clear()
+{
+	m_update.erase(std::remove_if(m_update.begin(), m_update.end(),[](UpdateLoopObject &object)
+	{
+		return object.m_destroyed;
+	}));
+}
+
+ax::Instance::UpdateLoop::UpdateLoop(const float interval):
+	m_interval(interval),m_elapsedTime(0)
+{
 }

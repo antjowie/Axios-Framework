@@ -4,6 +4,13 @@ namespace ax
 {
 	namespace Logger
 	{
+		enum MessageType
+		{
+			ERROR,
+			WARNING,
+			INFO
+		};
+
 		// Format: [%projectName% %messageType%] %className%: %message%
 		// verbosity, importance, the lower, the more important
 		// message, the message to log
@@ -11,6 +18,6 @@ namespace ax
 		// messageType, type of message (Error, Warn)
 		// className, name of the class (Instance)
 		void log(const int verbosity, const char* message, const char *projectName = "null",
-			const char *messageType = "null", const char *className = "null");
+			const MessageType messageType = MessageType::INFO, const char *className = "null");
 	}
 }

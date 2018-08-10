@@ -85,7 +85,7 @@ const ax::InputHandler::KeyState ax::InputHandler::getItem(const KeyItem &item, 
 		else if (item[1] != -1)
 			return getKey(item[1]);
 	}
-	Logger::log(5, std::string("item " + std::string(name) + " doesn't exist").c_str(), "Axios", "WARN", "InputHandler");
+	Logger::log(5, std::string("item " + std::string(name) + " doesn't exist").c_str(), "Axios", Logger::WARNING, "InputHandler");
 	return ax::InputHandler::KeyState();
 }
 

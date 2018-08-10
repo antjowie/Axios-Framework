@@ -3,6 +3,11 @@
 
 #include <SFML/Window/Keyboard.hpp>
 
+void function(const float elapsedTime)
+{
+
+}
+
 int main()
 {
 	ax::DataManager::Config([](const bool overwrite)
@@ -12,6 +17,11 @@ int main()
 		ax::DataManager::GameKey().check("right",{ sf::Keyboard::D, -1 }, overwrite);
 	});
 	
+	ax::UpdateLoopObject temp(ax::UpdateLoopType::Real, [](const float elapsedTime)
+	{
+
+	});
+
 	ax::Instance::getInstance().start();
 
 	return 0;
