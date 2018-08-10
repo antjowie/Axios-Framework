@@ -16,7 +16,8 @@ float getAverage(const std::list<float> & list)
 	return total / list.size();
 }
 
-ax::Instance::Instance()
+ax::Instance::Instance():
+	m_init(false)
 {
 }
 
@@ -38,9 +39,8 @@ void ax::Instance::setTitle(const char * title, const bool & append)
 		m_window.setTitle(m_currentTitle);
 }
 
-void ax::Instance::start()
+void ax::Instance::init()
 {
-	// Init phase
 	// Load config data
 	ax::DataManager::Config()._load("config/config.json");
 	ax::DataManager::GameKey()._load("config/keybindings.json");
@@ -59,6 +59,18 @@ void ax::Instance::start()
 
 	setTitle(ax::DataManager::Config().data["title"].c_str(), false);
 	updateUserConfig();
+
+	m_init = true;
+}
+
+void ax::Instance::start()
+{
+	// Check if user called init function
+	if (!m_init)
+	{
+		ax::Logger::log(5, "Init hasn't been called before start, custom configurations will not be applied", "Axios", ax::Logger::WARNING, "Instance");
+		init();
+	}
 
 	// These values can't be changed by the user during runtime, that's why they are local to this scope
     std::list<float> averageTime; // A class that keeps track of the time elapsed between reset calls
@@ -89,8 +101,9 @@ void ax::Instance::start()
 			
 			m_window.clear();
 
-            //updateScene(averageTime.getAverage());
-			
+			//m_realUpdateLoop._update(averageTime.getAverage());
+			m_realUpdateLoop._update(elapsedTime);
+
 			m_window.display();
         }
         elapsedTime += frameTime.restart().asSeconds();
@@ -108,13 +121,8 @@ ax::Instance & ax::Instance::getInstance()
 	return instance;
 }
 
-void ax::UpdateLoopObject::operator()(const float elapsedTime)
-{
-	m_function(elapsedTime);
-}
-
-ax::UpdateLoopObject::UpdateLoopObject(const UpdateLoopType updateLoopType, updateLoopFunction & function):
-	m_destroyed(false)
+ax::UpdateLoopObject::UpdateLoopObject(const UpdateLoopType updateLoopType, const UpdateFunction & updateFunction):
+	m_function(updateFunction)
 {
 	// Get the correct update loop
 	switch (updateLoopType)
@@ -129,8 +137,10 @@ ax::UpdateLoopObject::UpdateLoopObject(const UpdateLoopType updateLoopType, upda
 		Logger::log(0, "UpdateLoopType not specified", "Axios", ax::Logger::ERROR, "UpdateLoopObject");
 		break;
 	}
+	m_index = m_updateLoop->m_updateLoop.size();
+
 	// Push the object into the update loop
-	m_updateLoop->m_update.push_back(*this);
+	m_updateLoop->m_updateLoop.push_back(*this);
 
 	// Test code
 	std::stringstream ss;
@@ -140,7 +150,7 @@ ax::UpdateLoopObject::UpdateLoopObject(const UpdateLoopType updateLoopType, upda
 
 ax::UpdateLoopObject::~UpdateLoopObject()
 {
-	m_destroyed = true;
+	m_updateLoop->m_destroyIndexes.push_back(m_index);
 }
 
 void ax::Instance::UpdateLoop::_update(const float elapsedTime)
@@ -155,25 +165,26 @@ void ax::Instance::UpdateLoop::_update(const float elapsedTime)
 	
 	do
 	{
-		for (auto iter : m_update)
-		{
+		for (auto iter : m_updateLoop)
 			iter.get().m_function(modulo);
 
-			// Temp code
-			std::stringstream ss;
-			ss << static_cast<const void*>(&iter.get());
-			ax::Logger::log(0, ss.str().c_str(), "Axios", ax::Logger::INFO, "UpdateLoop");
-		}
 		m_elapsedTime -= modulo;
 	} while (m_elapsedTime > modulo);
 }
 
 void ax::Instance::UpdateLoop::_clear()
 {
-	m_update.erase(std::remove_if(m_update.begin(), m_update.end(),[](UpdateLoopObject &object)
+	for (const auto &iter : m_destroyIndexes)
 	{
-		return object.m_destroyed;
-	}));
+		// Update the index
+		m_updateLoop.back().get().m_index = m_updateLoop[iter].get().m_index;
+		
+		// Remove the element
+		std::swap(m_updateLoop[iter], m_updateLoop.back());
+		m_updateLoop.pop_back();
+	}
+
+	m_destroyIndexes.clear();
 }
 
 ax::Instance::UpdateLoop::UpdateLoop(const float interval):

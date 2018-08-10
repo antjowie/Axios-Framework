@@ -38,7 +38,10 @@ namespace ax
 
 			// These vectors contain the objects to update whatever
 			// code requests it.
-			std::vector<std::reference_wrapper<UpdateLoopObject>> m_update;
+			std::vector<std::reference_wrapper<UpdateLoopObject>> m_updateLoop;
+
+			// This vector contains the indexes to be destroyed
+			std::vector<int> m_destroyIndexes;
 
 			// Checks if the objects have to be updated
 			// If interval has been declared in the constructor,
@@ -58,6 +61,8 @@ namespace ax
 		UpdateLoop m_realUpdateLoop;
 		UpdateLoop m_physicsUpdateLoop;
 
+		bool m_init;
+
 	public:
 		// This function must be called after user settings have been changed
 		// Updates window if player changes to fullscreen
@@ -68,7 +73,14 @@ namespace ax
 		// to fullscreen and still have the old title
 		void setTitle(const char* title, const bool &append = true);
 		
+		// Initiates all the systems
+		// !!! If you want to add custom config 
+		// !!! you should first call the constructors
+		// !!! of the data manager class
+		void init();
+
 		// Starts the main gameloop
+		// !!! Run function init() first
 		// !!! If you want to add custom config 
 		// !!! you should first call the constructors
 		// !!! of the data manager class
@@ -83,30 +95,30 @@ namespace ax
 	class UpdateLoopObject
 	{
 	private:
-		using updateLoopFunction = void(*)(const float elapsedTime);
 		friend Instance;
-
-		updateLoopFunction m_function;
+		using UpdateFunction = void(*)(const float);
 
 		// We hold a reference to an update loop so that we can add as many 
 		// update loops as we want. This way, we don't have to check the type
 		// every time, we just call the referenced update loop
 		Instance::UpdateLoop *m_updateLoop;
 
-		// The bool is used to erase the object when 
-		// the owner of this class is destroyes
-		bool m_destroyed;
+		// The index used to clear the array after the
+		// Object has been removed
+		int m_index;
+
+		// This is th update function that is being called
+		// by the update loop class
+		UpdateFunction m_function;
 
 	public:
-
-		// This function directly calls the passed callback function
-		void operator()(const float elapsedTime);
-
+		
 		// UpdateLoopType is the type of updateLoop, there are two types
 		// Real, is updated every frame
 		// Physics, is updated on a specified interval
-		// updateLoopFunction: void (const float)
-		UpdateLoopObject(const UpdateLoopType updateLoopType, updateLoopFunction &function);
+		// UpdateFunction: void (const float)
+		UpdateLoopObject(const UpdateLoopType updateLoopType, const UpdateFunction &function);
+
 		~UpdateLoopObject();
 	};
 }

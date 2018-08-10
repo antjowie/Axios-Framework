@@ -25,7 +25,8 @@ namespace ax
 		public:
 			std::unordered_map<std::string, T> data;
 			
-			// Call this function in the callback function (extraCheck)
+			// !!! Call this function in the callback function (extraCheck)
+			// This functions inserts a config key
 			void check(const char* name, const T &value, const bool overwrite = false);
 			
 			// Used to check whole file
@@ -67,7 +68,8 @@ namespace ax
 	template<class T>
 	inline void DataManager::Data<T>::_check(const bool overwrite)
 	{
-		m_extraCheck(overwrite);
+		if(m_extraCheck)
+			m_extraCheck(overwrite);
 	}
 
 	template<class T>

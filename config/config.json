@@ -1,8 +1,8 @@
 {
-  "fullscreen": "1",
+  "fullscreen": "0",
   "refreshRate": "144",
   "title": "Axios Framework",
   "verbosity": "10",
-  "windowX": "2560",
-  "windowY": "1440"
+  "windowX": "100",
+  "windowY": "100"
 }
