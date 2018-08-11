@@ -121,8 +121,7 @@ ax::Instance & ax::Instance::getInstance()
 	return instance;
 }
 
-ax::UpdateLoopObject::UpdateLoopObject(const UpdateLoopType updateLoopType, const UpdateFunction & updateFunction):
-	m_function(updateFunction)
+ax::UpdateLoopObject::UpdateLoopObject(const UpdateLoopType updateLoopType)
 {
 	// Get the correct update loop
 	switch (updateLoopType)
@@ -166,7 +165,7 @@ void ax::Instance::UpdateLoop::_update(const float elapsedTime)
 	do
 	{
 		for (auto iter : m_updateLoop)
-			iter.get().m_function(modulo);
+			iter.get().update(modulo);
 
 		m_elapsedTime -= modulo;
 	} while (m_elapsedTime > modulo);

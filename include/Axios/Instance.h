@@ -96,7 +96,6 @@ namespace ax
 	{
 	private:
 		friend Instance;
-		using UpdateFunction = void(*)(const float);
 
 		// We hold a reference to an update loop so that we can add as many 
 		// update loops as we want. This way, we don't have to check the type
@@ -107,17 +106,16 @@ namespace ax
 		// Object has been removed
 		int m_index;
 
-		// This is th update function that is being called
-		// by the update loop class
-		UpdateFunction m_function;
-
 	public:
 		
 		// UpdateLoopType is the type of updateLoop, there are two types
 		// Real, is updated every frame
 		// Physics, is updated on a specified interval
 		// UpdateFunction: void (const float)
-		UpdateLoopObject(const UpdateLoopType updateLoopType, const UpdateFunction &function);
+		UpdateLoopObject(const UpdateLoopType updateLoopType);
+
+		// This is the function that you overwrite in your own code
+		virtual void update(const float elapsedTime) = 0;
 
 		~UpdateLoopObject();
 	};

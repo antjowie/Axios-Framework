@@ -7,9 +7,9 @@
 
 struct Temp: ax::UpdateLoopObject
 {
-	int count{ 0 };
+	int count;
 	
-	void function(const float elapsedTime)
+	virtual void update(const float elapsedTime) override final
 	{
 		count += 1;
 		std::stringstream ss;
@@ -19,22 +19,9 @@ struct Temp: ax::UpdateLoopObject
 		ax::Logger::log(0, std::to_string(count).c_str(), "Axios", ax::Logger::INFO, "UpdateLoop");
 	}
 
-	// I'm stuck. How can I pass a member function as function pointer?
-	Temp():
-		ax::UpdateLoopObject(ax::UpdateLoopType::Real, [this](const float elapsedTime)
-	{
-		count += 1;
-		std::stringstream ss;
-		ss << static_cast<const void*>(this);
-		ax::Logger::log(0, ss.str().c_str(), "Axios", ax::Logger::INFO, "UpdateLoop");
-
-		ax::Logger::log(0, std::to_string(count).c_str(), "Axios", ax::Logger::INFO, "UpdateLoop");
-
-	}
-		)
-	{
-
-	}
+	Temp() :
+		ax::UpdateLoopObject(ax::UpdateLoopType::Real), count(0)
+	{}
 };
 
 int main()
