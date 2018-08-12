@@ -2,11 +2,14 @@
 #include "Axios/InputHandler.h"
 #include "Axios/DataManager.h"
 #include "Axios/Logger.h"
+#include "Axios/Object.h"
 
 #include <SFML/System/Clock.hpp>
 #include <SFML/Window/Event.hpp>
 
 #include <sstream>
+
+unsigned int ax::Instance::UpdateLoop::m_id = 0;
 
 float getAverage(const std::list<float> & list)
 {
@@ -65,6 +68,32 @@ void ax::Instance::init()
 
 void ax::Instance::start()
 {
+	struct Temp : public ax::Object, public ax::UpdateLoopObject
+	{
+		const char* name;
+
+	virtual void update(const float elapsedTime) override final
+	{
+		ax::Logger::log(0, name, "Update");
+	}
+
+		Temp(const char* name)
+		:ax::UpdateLoopObject(ax::UpdateLoopType::Real), name(name)
+		{
+			ax::Logger::log(0, name, "Created");
+		}
+
+		~Temp()
+		{
+			ax::Logger::log(0, name, "Destroyed");
+		}
+	};
+
+	std::vector<Temp*> t;
+	t.push_back(new Temp("0"));
+	t.push_back(new Temp("0"));
+	t.push_back(new Temp("0"));
+	
 	// Check if user called init function
 	if (!m_init)
 	{
@@ -102,8 +131,19 @@ void ax::Instance::start()
 			m_window.clear();
 
 			//m_realUpdateLoop._update(averageTime.getAverage());
+			m_physicsUpdateLoop._update(elapsedTime);
 			m_realUpdateLoop._update(elapsedTime);
 
+			if (!t.empty())
+			{
+				t.back()->m_destroy = true;
+				t.pop_back();
+			}
+
+			ax::ObjectManager::getInstance()._clear();
+			m_physicsUpdateLoop._clear();
+			m_realUpdateLoop._clear();
+			
 			m_window.display();
         }
         elapsedTime += frameTime.restart().asSeconds();
@@ -121,35 +161,25 @@ ax::Instance & ax::Instance::getInstance()
 	return instance;
 }
 
-ax::UpdateLoopObject::UpdateLoopObject(const UpdateLoopType updateLoopType)
+void ax::UpdateLoopObject::update(const float elapsedTime)
 {
-	// Get the correct update loop
-	switch (updateLoopType)
-	{
-	case UpdateLoopType::Real:
-		m_updateLoop = &ax::Instance::getInstance().m_realUpdateLoop;
-		break;
-	case UpdateLoopType::Physics:
-		m_updateLoop = &ax::Instance::getInstance().m_physicsUpdateLoop;
-		break;
-	default:
-		Logger::log(0, "UpdateLoopType not specified", "Axios", ax::Logger::ERROR, "UpdateLoopObject");
-		break;
-	}
-	m_index = m_updateLoop->m_updateLoop.size();
+}
 
-	// Push the object into the update loop
-	m_updateLoop->m_updateLoop.push_back(*this);
+void ax::UpdateLoopObject::physicsUpdate(const float elapedTime)
+{
+}
 
-	// Test code
-	std::stringstream ss;
-	ss << static_cast<const void*>(this);
-	ax::Logger::log(0, ss.str().c_str(), "Axios", ax::Logger::INFO, "UpdateLoopObject");
+ax::UpdateLoopObject::UpdateLoopObject():
+	m_id(Instance::UpdateLoop::_getId())
+{
 }
 
 ax::UpdateLoopObject::~UpdateLoopObject()
 {
-	m_updateLoop->m_destroyIndexes.push_back(m_index);
+	if(m_hookedToUpdate)
+		Instance::getInstance().m_realUpdateLoop.m_destroyIds.push_back(m_id);
+	if(m_hookedToPhysicsUpdate)
+		Instance::getInstance().m_physicsUpdateLoop.m_destroyIds.push_back(m_id);
 }
 
 void ax::Instance::UpdateLoop::_update(const float elapsedTime)
@@ -165,7 +195,7 @@ void ax::Instance::UpdateLoop::_update(const float elapsedTime)
 	do
 	{
 		for (auto iter : m_updateLoop)
-			iter.get().update(modulo);
+			iter->update(modulo);
 
 		m_elapsedTime -= modulo;
 	} while (m_elapsedTime > modulo);
@@ -173,20 +203,28 @@ void ax::Instance::UpdateLoop::_update(const float elapsedTime)
 
 void ax::Instance::UpdateLoop::_clear()
 {
-	for (const auto &iter : m_destroyIndexes)
-	{
-		// Update the index
-		m_updateLoop.back().get().m_index = m_updateLoop[iter].get().m_index;
-		
-		// Remove the element
-		std::swap(m_updateLoop[iter], m_updateLoop.back());
-		m_updateLoop.pop_back();
-	}
+	// Pretty inefficient code, but we will see if this code will be a bottleneck 
+	// in the future.
+	m_updateLoop.erase(std::remove_if(m_updateLoop.begin(),m_updateLoop.end(),
+		[&](ax::UpdateLoopObject *object)
+		{
+			bool hit{ false };
+			for (const auto &iter : m_destroyIds)
+				if (object->m_id == iter)
+					hit = true;
+			return hit;
+		}
+	),m_updateLoop.end());
 
-	m_destroyIndexes.clear();
+	m_destroyIds.clear();
+}
+
+unsigned int ax::Instance::UpdateLoop::_getId()
+{
+	return m_id++;
 }
 
 ax::Instance::UpdateLoop::UpdateLoop(const float interval):
-	m_interval(interval),m_elapsedTime(0)
+	m_interval(interval),m_elapsedTime(0),m_id(0)
 {
 }

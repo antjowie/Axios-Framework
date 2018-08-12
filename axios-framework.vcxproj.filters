@@ -30,6 +30,9 @@
     <ClInclude Include="include\Axios\Logger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Axios\Object.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Axios\Instance.cpp">
@@ -48,6 +51,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Axios\Logger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Axios\Object.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

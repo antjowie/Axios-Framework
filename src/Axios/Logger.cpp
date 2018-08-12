@@ -34,5 +34,5 @@ void ax::Logger::log(const int verbosity, const char * message, const char * pro
 	string.append(": ");
 	string.append(message);
 
-	std::clog << string;
+	std::clog << string << '\n';
 }
