@@ -1,0 +1,17 @@
+{
+  "config": {
+    "fullscreen": "0",
+    "physicsPolling": "100",
+    "refreshRate": "144",
+    "title": "Axios Framework",
+    "verbosity": "10",
+    "vsync": "0",
+    "windowX": "1280",
+    "windowY": "720"
+  },
+  "keybinding": {
+    "jump": "k57",
+    "left": "k71",
+    "right": "k72"
+  }
+}

@@ -26,10 +26,9 @@ namespace ax
 		// to fullscreen and still have the old title
 		void setTitle(const char* title, const bool &append = true);
 
-		// Initiates all the systems
-		// !!! If you want to add custom config 
-		// !!! you should first call the constructors
-		// !!! of the data manager class
+		// Initiates all the systems.
+		// !!! Add your custom config
+		// !!! before this function.
 		void init();
 
 		// Starts the main gameloop

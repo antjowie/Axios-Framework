@@ -12,6 +12,13 @@ namespace ax
 	class InputHandler
 	{
 	private:
+		enum KeyType
+		{
+			Keyboard,
+			Mouse,
+			Count
+		};
+
 		struct KeyState
 		{
 			bool isPressed{ false };
@@ -19,30 +26,36 @@ namespace ax
 			bool isReleased{ false };
 		};
 
-		// These vectors are filled with all the keys and their state
-		std::array<KeyState, sf::Keyboard::KeyCount> m_keys;
-		std::array<KeyState, sf::Mouse::ButtonCount> m_buttons;
+		// This array contains all the buttons
+		std::array<std::vector<KeyState>, KeyType::Count> m_keyItems;
+
 		bool m_anyKeyPressed;
+		bool m_controllerDetected;
 
 		InputHandler();
 
 	public:
+
+		struct KeyItem
+		{
+			const char* name;
+			KeyType keyType;
+			int key;
+
+			KeyItem(const char *name, KeyType keyType, int key);
+		};
+
 		// Uses an event from the game loop to not skip events
 		void _update(sf::RenderWindow & window, sf::Event &event);
 
-		bool isAnyKeyPressed() const;
+		const bool isAnyKeyPressed() const;
 
-		// Used to check individual key
-		const KeyState &getKey(const int keyName) const;
-		
-		// Used to check individual button
-		const KeyState &getButton(const int buttonName) const;
-		
-		// Used to check item from config
-		const KeyState getItem(const KeyItem &item, const char* name = "NO_NAME") const;
-		// Calls the dataManager internally
-		const KeyState getItem(const char* name) const;
+		// Item is the name that is given to the keybinding
+		const KeyState getState(const char* item) const;
 
+		// Give a state and return the information
+		const KeyState getState(const KeyItem &state) const;
+		
 		static InputHandler &getInstance();
 	};
 

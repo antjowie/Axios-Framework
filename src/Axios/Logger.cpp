@@ -5,9 +5,9 @@
 
 void ax::Logger::log(const int verbosity, const char * message, const char * projectName, const MessageType messageType, const char * className)
 {
-	if (verbosity > std::stoi(DataManager::Config().data["verbosity"]))
-		return;
-
+//	if (verbosity > std::stoi(DataManager::Config().data["verbosity"]))
+//		return;
+//
 	// This is so ugly, where is my string formatting???
 	std::string string;
 	string.append("[");

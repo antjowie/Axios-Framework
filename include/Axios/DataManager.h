@@ -4,101 +4,67 @@
 #include <fstream>
 #include <unordered_map>
 
-using KeyItem = std::array<int, 2>;
-
 namespace ax
 {	
 	class DataManager
 	{
+	public:
+		// This is a default config layout
+		struct Config
+		{
+			const char* category;
+			const char* key;
+			const char* value;
+
+			Config(const char* category, const char* key, const char* value);
+		};
+
 	private:
-		using extraCheck = void(*)(const bool overwrite);
 		using json = nlohmann::json;
 		
-		// The data container contains the basic structure for every config type
-		// It is also able to serialize the data
-		template <class T>
-		class Data
-		{
-		private:
-			extraCheck m_extraCheck;
-	
-		public:
-			std::unordered_map<std::string, T> data;
-			
-			// !!! Call this function in the callback function (extraCheck)
-			// This functions inserts a config key
-			void check(const char* name, const T &value, const bool overwrite = false);
-			
-			// Used to check whole file
-			// Called when the file is loaded to 
-			// see if nothing is corrupted or missing
-			void _check(const bool overwrite = false);
-			
-			// Import data from path
-			void _load(const char* path);
-
-			// Export data to path
-			void _save(const char* path);
-
-			// Override this to add custom configurations to check
-			// Use the check function in the callback body
-			// The extraCheck should return void and take one bool as parameter
-			// The bool is used when two configurations overlap, overwrite will
-			// overwrite the configuration
-			Data(const extraCheck &extraCheck);
-		};
+		// The first map represents the category
+		// The second map represents the configuration
+		std::unordered_map<std::string, 
+			std::unordered_map<std::string, std::string>> m_data;
 		
+		std::vector<Config> m_control;
+
 	public:
-		// This container contains all the configurations of the game
-		// extraCheck = void (const bool)
-		static Data<std::string>& Config(const extraCheck &extraCheck = nullptr);
-		
-		// extraCheck = void (const bool)
-		// This container contains all the keybinding of the user
-		static Data<KeyItem>& GameKey(const extraCheck &extraCheck = nullptr);
+		// Add an config to the default configuration.
+		// Call this function if you want to save
+		// the state of any configuration
+		// 
+		// If a config occurs twice, it is up to the bool to 
+		// overwrite it or not.
+		void addToDefaultConfig(const Config &config, const bool overwriteOnOccurance);
+
+		// Gets the value of a config
+		// If the config is not found, returns -1
+		std::string getConfig(const char* category, const char* key) const;
+
+		// This sets a value into the config
+		// If the config already exists, overwrite it.
+		// If it doesn't, add it to the file.
+		// Only the configurations inside of the control
+		// vector will be saved. Be sure to call the function
+		// addToDefaultConfig if the configurations state has
+		// to be saved
+		void setConfig(const Config& config);
+
+		// Import data from path
+		void _load(const char* path);
+
+		// Export data to path
+		void _save(const char* path);
+
+		// Check the config with configs inside the control vector
+		// If the name inside the data doesn't occur inside of the 
+		// control vector, it is removed.
+		//
+		// If overwriteToDefault is true, all the settings will be
+		// set to the default state according to the control vector
+		void _checkConfig(bool overwriteToDefault);
+
+		static DataManager& getInstance();
 	};
-
-	template<class T>
-	inline void DataManager::Data<T>::check(const char * name, const T &value, const bool overwrite)
-	{
-		if (overwrite || data.count(name) == 0)
-			data[name] = value;
-	}
-
-	template<class T>
-	inline void DataManager::Data<T>::_check(const bool overwrite)
-	{
-		if(m_extraCheck)
-			m_extraCheck(overwrite);
-	}
-
-	template<class T>
-	inline void DataManager::Data<T>::_load(const char * path)
-	{
-		std::ifstream configFile(path);
-		json config;
-		if (configFile.is_open())
-		{
-			std::stringstream stream;
-			stream << configFile.rdbuf();
-			config = json::parse(stream.str());
-		}
-
-		for (json::iterator it = config.begin(); it != config.end(); ++it)
-			data[it.key()] = it.value().get<T>();
-	}
-	template<class T>
-	inline void DataManager::Data<T>::_save(const char * path)
-	{
-		std::ofstream configFile(path, std::ios::trunc);
-		json config(data);
-		configFile << config.dump(2);
-		configFile.close();
-	}
-
-	template<class T>
-	inline DataManager::Data<T>::Data(const extraCheck & extraCheck):
-		m_extraCheck(extraCheck)
-	{
-	}
 }

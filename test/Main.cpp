@@ -1,22 +1,16 @@
 #include "Axios/Instance.h"
 #include "Axios/DataManager.h"
 
-#include "Axios/Logger.h"
-
 #include <SFML/Window/Keyboard.hpp>
 
 int main()
 {
-	ax::DataManager::Config([](const bool overwrite)
-	{
-		ax::DataManager::GameKey().check("jump",{ sf::Keyboard::Space, -1 }, overwrite);
-		ax::DataManager::GameKey().check("left",{ sf::Keyboard::A, -1 }, overwrite);
-		ax::DataManager::GameKey().check("right",{ sf::Keyboard::D, -1 }, overwrite);
-	});
-	
+	ax::DataManager::getInstance().addToDefaultConfig(ax::DataManager::Config("keybinding", "left" , "k71"),false);
+	ax::DataManager::getInstance().addToDefaultConfig(ax::DataManager::Config("keybinding", "right", "k72"),false);
+	ax::DataManager::getInstance().addToDefaultConfig(ax::DataManager::Config("keybinding", "jump" , "k57"),false);
 
 	ax::Instance::getInstance().init();
-	
+
 	ax::Instance::getInstance().start();
 
 	return 0;
