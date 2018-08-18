@@ -3,6 +3,23 @@
 
 #include <SFML/Window/Event.hpp>
 
+void ax::InputHandler::setState(const KeyItem & keyItem)
+{
+	std::string keyCode;
+	switch (keyItem.keyType)
+	{
+	case KeyType::Keyboard:
+		keyCode.push_back('k');
+		break;
+	
+	case KeyType::Mouse:
+		keyCode.push_back('m');
+		break;
+	}
+	keyCode.append(std::to_string(keyItem.key));
+	ax::DataManager::getInstance().setConfig({ "keybinding",keyItem.name,keyCode.c_str() });
+}
+
 ax::InputHandler& ax::InputHandler::getInstance()
 {
 	static ax::InputHandler instance;
@@ -62,6 +79,11 @@ void ax::InputHandler::_update(sf::RenderWindow & window, sf::Event &event)
 const bool ax::InputHandler::isAnyKeyPressed() const
 {
 	return m_anyKeyPressed;
+}
+
+const bool ax::InputHandler::isAnyControllerConnected() const
+{
+	return m_controllerDetected;
 }
 
 const ax::InputHandler::KeyState ax::InputHandler::getState(const char* name) const

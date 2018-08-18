@@ -30,12 +30,9 @@ namespace ax
 		std::vector<Config> m_control;
 
 	public:
-		// Add an config to the default configuration.
-		// Call this function if you want to save
-		// the state of any configuration
-		// 
-		// If a config occurs twice, it is up to the bool to 
-		// overwrite it or not.
+		// Add a config to the default configuration.
+		// If your config isn't added to this, it will
+		// be removed when _checkConfig is called
 		void addToDefaultConfig(const Config &config, const bool overwriteOnOccurance);
 
 		// Gets the value of a config
@@ -45,16 +42,18 @@ namespace ax
 		// This sets a value into the config
 		// If the config already exists, overwrite it.
 		// If it doesn't, add it to the file.
-		// Only the configurations inside of the control
-		// vector will be saved. Be sure to call the function
-		// addToDefaultConfig if the configurations state has
-		// to be saved
+		// !!! Only the configurations inside of the control
+		// !!! vector will be saved. Be sure to call the function
+		// !!! addToDefaultConfig if the configurations state has
+		// !!! to be saved
 		void setConfig(const Config& config);
 
 		// Import data from path
+		// Doesn't check the data loaded
 		void _load(const char* path);
 
 		// Export data to path
+		// Doesn't check the config map
 		void _save(const char* path);
 
 		// Check the config with configs inside the control vector

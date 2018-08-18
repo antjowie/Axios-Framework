@@ -33,8 +33,10 @@
     <ClInclude Include="include\Axios\Instance.h" />
     <ClInclude Include="include\Axios\Logger.h" />
     <ClInclude Include="include\Axios\Object.h" />
+    <ClInclude Include="include\Axios\Scene.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="include\Axios\Scene.cpp" />
     <ClCompile Include="src\Axios\AssetsManager.cpp" />
     <ClCompile Include="src\Axios\DataManager.cpp" />
     <ClCompile Include="src\Axios\InputHandler.cpp" />

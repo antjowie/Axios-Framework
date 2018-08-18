@@ -3,61 +3,94 @@
 
 #include <algorithm>
 
-ax::ObjectManager::ObjectManager():
-	m_currentUniqueID(0)
+ax::ObjectManager::ObjectManager()
 {
 	m_objects.resize(Object::Type::Count);
 }
 
-void ax::ObjectManager::_update(const double elapsedTime)
+ax::ObjectManager::~ObjectManager()
 {
+	for (auto &type : m_objects)
+		for (auto &object : type)
+			delete object;
 }
 
-void ax::ObjectManager::_physicsUpdate(const double elapsedTime)
+void ax::ObjectManager::_update(const double elapsedTime)
 {
+	for (auto &type : m_objects)
+		for (auto &object : type)
+			object->update(elapsedTime);
 }
 
 void ax::ObjectManager::_draw(sf::RenderWindow & window, const double & accumulator)
 {
+	for (auto &type : m_objects)
+		for (auto &object : type)
+			window.draw(*object);
+}
+
+void ax::ObjectManager::_add(Object * object)
+{
+	m_objects[object->m_type].push_back(object);
+	_m_referenceManager.m_array[object->m_referenceIndex] = object;
 }
 
 void ax::ObjectManager::_clear()
 {	
+	// This deletes all the objects that have their delete flag set to true.
+	// Because the memory is deallocated, we can just remove the pointers from the vector
 	for(auto &deleter : m_objects)
 	deleter.erase(std::remove_if(deleter.begin(),deleter.end(),
-		[](Object *object)
+		[&](Object *object)
 	{
-		bool state = (object == nullptr);
-		if (state)
+		if (object->m_destroy)
+		{
+			// Erase object from reference manager
+			_m_referenceManager.m_array[object->m_referenceIndex] = nullptr;
+			
+			// Delete the object
 			delete object;
-		return state;
+
+			// Erase object from data container
+			return true;
+		}
+		return false;
 	}
 	),deleter.end());
 }
 
-unsigned int ax::ObjectManager::_getUniqueID()
+void ax::Object::draw(sf::RenderTarget & window, sf::RenderStates states) const
 {
-	return m_currentUniqueID++;
 }
 
-ax::ObjectManager & ax::ObjectManager::getInstance()
+void ax::Object::update(const double elapsedTime)
 {
-	static ObjectManager objectManager;
-	return objectManager;
+	if (m_timeTillDestroy == -1)
+		return;
+
+	m_timeTillDestroy -= (float)elapsedTime;
+	if (m_timeTillDestroy <= 0)
+		m_destroy = true;
 }
 
-ax::Object::Object(const Type type):
-	m_uniqueID(ax::ObjectManager::getInstance()._getUniqueID()),
-	m_uniqueReferenceID(ax::ObjectReferenceManager::_getUniqueID()),
-	m_referenceIndex(ax::ObjectReferenceManager::_getFirstFreeIndex()),
+void ax::Object::destroy(float timeTillDestroy)
+{
+	m_timeTillDestroy = timeTillDestroy;
+}
+
+ax::Object::Object(ObjectFactory &objectFactory, const Type type):
+	m_objectFactory(objectFactory),
+	m_referenceIndex(objectFactory._m_objectManager._m_referenceManager._getFirstFreeIndex()),
+	m_uniqueReferenceID(objectFactory._m_objectManager._m_referenceManager._getUniqueID()),
+	m_type(type),
 	m_destroy(false)
 {
-	ax::Logger::log(10, std::string("Object " + std::to_string(m_uniqueID) + " created").c_str(), "Axios",Logger::INFO,"Object");
+	ax::Logger::log(10, std::string("Object " + std::to_string(m_uniqueReferenceID) + " created").c_str(), "Axios",Logger::INFO,"Object");
 }
 
 ax::Object::~Object()
 {
-	ax::Logger::log(10, std::string("Object " + std::to_string(m_uniqueID) + " destroyed").c_str(), "Axios", Logger::INFO, "Object");
+	ax::Logger::log(10, std::string("Object " + std::to_string(m_uniqueReferenceID) + " destroyed").c_str(), "Axios", Logger::INFO, "Object");
 }
 
 unsigned int ax::ObjectReferenceManager::_getUniqueID()
@@ -66,18 +99,39 @@ unsigned int ax::ObjectReferenceManager::_getUniqueID()
 	return ID++;
 }
 
-unsigned int ax::ObjectReferenceManager::_getFirstFreeIndex()
+unsigned int ax::ObjectReferenceManager::_getFirstFreeIndex() const
 {
 	unsigned int index{ 0 };
-	while (index < m_size)
+	while (index < maxObjectCount)
+	{
 		if (m_array[index] == nullptr)
+		{
 			return index;
+		}
+		index++;
+	}
 
 	ax::Logger::log(0, "Maximum Object count surpassed", "Axios", ax::Logger::ERROR, "ObjectReferenceManager");
 	return -1;
 }
 
 ax::ObjectReference::ObjectReference(Object * object) :
-	m_index(object->m_referenceIndex), m_uniqueID(object->m_uniqueReferenceID)
+	m_referenceIndex(object->m_referenceIndex), 
+	m_uniqueReferenceID(object->m_uniqueReferenceID),
+	m_referenceManager(object->m_objectFactory._m_objectManager._m_referenceManager)
+{
+}
+ 
+ax::Object * ax::ObjectReference::get()
+{
+	Object *object = m_referenceManager.m_array[m_referenceIndex];
+	if (object != nullptr && object->m_uniqueReferenceID == m_uniqueReferenceID)
+		return object;
+
+	return nullptr;
+}
+
+ax::ObjectFactory::ObjectFactory(ObjectManager & objectManager):
+	_m_objectManager(objectManager)
 {
 }

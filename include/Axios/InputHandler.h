@@ -35,7 +35,8 @@ namespace ax
 		InputHandler();
 
 	public:
-
+		// A key item is an item that contains a certain key binding.
+		// It contains the keybinding name, keytype, and key code
 		struct KeyItem
 		{
 			const char* name;
@@ -48,7 +49,9 @@ namespace ax
 		// Uses an event from the game loop to not skip events
 		void _update(sf::RenderWindow & window, sf::Event &event);
 
+		// Some getters
 		const bool isAnyKeyPressed() const;
+		const bool isAnyControllerConnected() const;
 
 		// Item is the name that is given to the keybinding
 		const KeyState getState(const char* item) const;
@@ -56,6 +59,11 @@ namespace ax
 		// Give a state and return the information
 		const KeyState getState(const KeyItem &state) const;
 		
+		// !!! If the state name is not added to the control vector
+		// !!! inside of the data manager class, the key item will
+		// !!! not be saved.
+		void setState(const KeyItem &keyItem);
+
 		static InputHandler &getInstance();
 	};
 

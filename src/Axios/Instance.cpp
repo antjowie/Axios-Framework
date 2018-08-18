@@ -1,76 +1,15 @@
 #include "Axios/Instance.h"
 #include "Axios/InputHandler.h"
 #include "Axios/DataManager.h"
-#include "Axios/Logger.h"
 #include "Axios/Object.h"
 
 #include <SFML/System/Clock.hpp>
 #include <SFML/Window/Event.hpp>
 
-ax::Instance::Instance():
-	m_init(false)
+ax::Instance::Instance() :
+	m_init(false),
+	m_currentScene(nullptr)
 {
-}
-
-void ax::Instance::updateUserConfig()
-{
-	// Fix the fullscreen
-	m_window.create(
-		sf::VideoMode(std::stoi(ax::DataManager::getInstance().getConfig("config", "windowX")), std::stoi(ax::DataManager::getInstance().getConfig("config", "windowY"))), 
-		m_currentTitle, ax::DataManager::getInstance().getConfig("config", "fullscreen") == "1" ? sf::Style::Fullscreen : sf::Style::Default);
-	
-	// Enable or disable the vsync
-	if (ax::DataManager::getInstance().getConfig("config", "vsync") == "1")
-	{
-		m_window.setFramerateLimit(std::stoi(ax::DataManager::getInstance().getConfig("config", "refreshRate")));
-		m_window.setVerticalSyncEnabled(true);
-	}
-	else
-	{
-		m_window.setVerticalSyncEnabled(false);
-		m_window.setFramerateLimit(std::stoi(ax::DataManager::getInstance().getConfig("config", "refreshRate")));
-	}
-
-	// Update the physics engine polling rate
-	m_physicsPolling = 1.f / std::stof(ax::DataManager::getInstance().getConfig("config", "physicsPolling"));
-}
-
-void ax::Instance::setTitle(const char * title, const bool & append)
-{
-	if (!append)
-		m_currentTitle = title;
-	else
-		m_currentTitle = ax::DataManager::getInstance().getConfig("config", "title") + " | " + std::string(title);
-
-	if (m_window.isOpen())
-		m_window.setTitle(m_currentTitle);
-}
-
-void ax::Instance::init()
-{
-	// Load config data
-	ax::DataManager::getInstance()._load("config.json");
-	
-	// Check framework related config
-	ax::DataManager::getInstance().addToDefaultConfig({ "config", "title", "No title" }, false);
-	ax::DataManager::getInstance().addToDefaultConfig({ "config", "verbosity", "10" }, false);
-
-	// Check user related config
-	ax::DataManager::getInstance().addToDefaultConfig({ "config", "windowX", std::to_string(sf::VideoMode().getDesktopMode().width).c_str() }, false);
-	ax::DataManager::getInstance().addToDefaultConfig({ "config", "windowY", std::to_string(sf::VideoMode().getDesktopMode().height).c_str() }, false);
-	ax::DataManager::getInstance().addToDefaultConfig({ "config", "fullscreen", "0" }, false);
-	ax::DataManager::getInstance().addToDefaultConfig({ "config", "refreshRate", "144" }, false);
-	ax::DataManager::getInstance().addToDefaultConfig({ "config", "vsync", "0" }, false);
-
-	// Check system related config
-	ax::DataManager::getInstance().addToDefaultConfig({ "config", "physicsPolling" , "100" }, false);
-
-	ax::DataManager::getInstance()._checkConfig(false);
-
-	setTitle(ax::DataManager::getInstance().getConfig("config","title").c_str(), false);
-	updateUserConfig();
-
-	m_init = true;
 }
 
 void ax::Instance::start()
@@ -78,8 +17,8 @@ void ax::Instance::start()
 	// Check if user called init function
 	if (!m_init)
 	{
-		ax::Logger::log(5, "Init hasn't been called before start, custom configurations will not be applied", "Axios", ax::Logger::WARNING, "Instance");
-		init();
+		ax::Logger::log(0, "Init hasn't been called before start, custom configurations will not be applied", "Axios", ax::Logger::ERROR, "Instance");
+		return;
 	}
 
 	// These values can't be changed by the user during runtime, that's why they are local to this scope
@@ -101,30 +40,32 @@ void ax::Instance::start()
             continue;
         }
 
-		accumulator += elapsedTime;
-		
-		ax::InputHandler::getInstance()._update(m_window,event);   
-		ax::ObjectManager::getInstance()._update(elapsedTime);
+		// Check if scene has to be swapped
+		if (m_currentScene->m_nextScene != nullptr)
+		{
+			// Keep address of old scene
+			Scene * toDelete = m_currentScene;
+			m_currentScene->onExit();
 			
-		while (accumulator >= m_physicsPolling)
-        {
-			ax::ObjectManager::getInstance()._physicsUpdate(m_physicsPolling);
-			accumulator -= m_physicsPolling;
-        }
+			// Swap scene
+			m_currentScene = m_currentScene->m_nextScene;
+			delete toDelete;
+			m_currentScene->onEnter();
+		}
 
+		ax::InputHandler::getInstance()._update(m_window,event);   
+	
+		m_currentScene->_update(elapsedTime);
+ 
 		m_window.clear();
-
-		ax::ObjectManager::getInstance()._draw(m_window, accumulator);
+		 
+		m_currentScene->_draw(m_window, accumulator);
 
 		m_window.display();
     }
 
 	// Deinit phase
+	delete m_currentScene;
+	ax::DataManager::getInstance()._checkConfig(false);
 	ax::DataManager::getInstance()._save("config.json");
-}
-
-ax::Instance & ax::Instance::getInstance()
-{
-	static Instance instance;
-	return instance;
 }

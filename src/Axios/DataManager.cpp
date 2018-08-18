@@ -3,8 +3,8 @@
 
 void ax::DataManager::addToDefaultConfig(const Config & config, const bool overwriteOnOccurance)
 {
-	auto swapIter{ std::find_if(m_control.begin(),m_control.end(),[&](Config iter)
-	{
+	auto swapIter{ std::find_if(m_control.begin(),m_control.end(),
+		[&](Config iter){
 		return (config.category == iter.category && config.key == iter.key);
 	})};
 	
@@ -24,11 +24,7 @@ void ax::DataManager::_checkConfig(bool overwriteToDefault)
 		std::unordered_map<std::string, std::string>> newData;
 
 	for (const auto &iter : m_control)
-	{
-		newData[iter.category][iter.key] = iter.value;
-		if (!overwriteToDefault && m_data.count(iter.category) != 0 && m_data.at(iter.category).count(iter.key) != 0)
-			newData[iter.category][iter.key] = m_data[iter.category][iter.key];
-	}
+		newData[iter.category][iter.key] = overwriteToDefault ? iter.value : m_data[iter.category][iter.key];
 
 	m_data = std::move(newData);
 }
