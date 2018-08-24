@@ -36,13 +36,13 @@
     <ClInclude Include="include\Axios\Scene.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="include\Axios\Scene.cpp" />
     <ClCompile Include="src\Axios\AssetsManager.cpp" />
     <ClCompile Include="src\Axios\DataManager.cpp" />
     <ClCompile Include="src\Axios\InputHandler.cpp" />
     <ClCompile Include="src\Axios\Instance.cpp" />
     <ClCompile Include="src\Axios\Logger.cpp" />
     <ClCompile Include="src\Axios\Object.cpp" />
+    <ClCompile Include="src\Axios\Scene.cpp" />
     <ClCompile Include="test\Main.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

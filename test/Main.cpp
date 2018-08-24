@@ -42,7 +42,6 @@ public:
 
 int main()
 {
-
 	ax::DataManager::getInstance().addToDefaultConfig(ax::DataManager::Config("keybinding", "left" , "k71"),false);
 	ax::DataManager::getInstance().addToDefaultConfig(ax::DataManager::Config("keybinding", "right", "k72"),false);
 	ax::DataManager::getInstance().addToDefaultConfig(ax::DataManager::Config("keybinding", "jump" , "k57"),false);

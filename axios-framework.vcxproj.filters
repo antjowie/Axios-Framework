@@ -59,7 +59,7 @@
     <ClCompile Include="src\Axios\Object.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="include\Axios\Scene.cpp">
+    <ClCompile Include="src\Axios\Scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
