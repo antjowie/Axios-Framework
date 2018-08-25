@@ -3,8 +3,15 @@
 
 void ax::Scene::onEnter()
 {
+	// Update window settinsg
 	setTitle(ax::DataManager::getInstance().getConfig("config", "title").c_str(), false);
 	updateUserConfig();
+
+//	// Load level data
+//	using json = nlohmann::json;
+//	std::ofstream file;
+//	if(file.open(m_filePath))
+	
 }
 
 void ax::Scene::onExit()
@@ -22,6 +29,8 @@ void ax::Scene::_update(const double elapsedTime)
 		//	ax::ObjectManager::getInstance()._physicsUpdate(m_physicsPolling);
 		m_accumulator -= m_physicsPolling;
 	}
+
+	m_objectManager._clear();
 }
 
 void ax::Scene::_draw(sf::RenderWindow & window, const double accumulator)
@@ -66,6 +75,7 @@ void ax::Scene::setTitle(const char * title, const bool & append)
 ax::Scene::Scene(sf::RenderWindow & window, const char* filePath):
 	m_window(window),
 	m_objectFactory(m_objectManager),
+	m_objectManager(m_objectFactory),
 	m_nextScene(nullptr),
 	m_filePath(filePath)
 {

@@ -1,6 +1,6 @@
 {
   "config": {
-    "firstScenePath": "/",
+    "firstScenePath": "test/tempLevel.json",
     "fullscreen": "0",
     "physicsPolling": "100",
     "refreshRate": "144",

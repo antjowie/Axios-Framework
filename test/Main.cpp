@@ -10,15 +10,19 @@
 
 class TempObject : public ax::Object
 {
+private:
+	std::string m_attack;
+
 public:
-	virtual void update(const double elapsedTime) override final
+	TempObject(ax::ObjectFactory & objectFactory):
+		Object(objectFactory,Type::Hud,"temp")
 	{
-		ax::Logger::log(9, std::to_string(m_uniqueReferenceID).c_str());
+		addToSerialization("attack", &m_attack, SerializeItem::Type::String);
 	}
 
-	TempObject(ax::ObjectFactory & objectFactory):
-		Object(objectFactory,Type::Hud)
+	~TempObject()
 	{
+		ax::Logger::log(0, m_attack.c_str());
 	}
 };
 
@@ -28,9 +32,14 @@ public:
 	virtual void onEnter() override final
 	{
 		m_objectFactory.add<TempObject>("temp");
-		m_objectFactory.construct("temp");
-		m_objectFactory.construct("temp");
-		m_objectFactory.construct("temp");
+		std::unordered_map<std::string, std::string> map;
+		map["attack"] = "I am dashing";
+		m_objectFactory.construct("temp",map).get()->destroy(5);
+		map["attack"] = "I breath fire";
+		m_objectFactory.construct("temp",map).get()->destroy(10);
+		map["attack"] = "I explode!!!";
+		m_objectFactory.construct("temp",map).get()->destroy(15);
+		
 		Scene::onEnter();
 	}
 

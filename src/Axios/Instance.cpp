@@ -55,8 +55,8 @@ void ax::Instance::start()
 
 		ax::InputHandler::getInstance()._update(m_window,event);   
 	
-		m_currentScene->_update(elapsedTime);
- 
+		m_currentScene->_update(elapsedTime);	
+
 		m_window.clear();
 		 
 		m_currentScene->_draw(m_window, accumulator);

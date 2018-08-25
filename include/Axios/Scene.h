@@ -62,6 +62,7 @@ namespace ax
 		// to fullscreen and still have the old title
 		void setTitle(const char* title, const bool &append = true);
 
+		// !!! Always leave the body of this constuctor empty
 		Scene(sf::RenderWindow& window, const char* filePath);
 	};
 }

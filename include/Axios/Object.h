@@ -1,4 +1,6 @@
 #pragma once
+#include "Axios/Logger.h"
+
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Drawable.hpp>
 
@@ -15,11 +17,12 @@ namespace ax
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	// Manages object query, lifetime, updating and serialization
+	// Manages object query, lifetime, updating and serialization.
+	// This is an internal class.
 	class ObjectReferenceManager
 	{
 	public:
-		Object* m_array[maxObjectCount];
+		Object* _m_array[maxObjectCount];
 
 		// Gets a unique index
 		unsigned int _getUniqueID();
@@ -52,14 +55,36 @@ namespace ax
 	// This class will add your object to the object manager container
 	class Object : public sf::Drawable
 	{
+	public:
+		// Used to serialize data
+		struct SerializeItem
+		{
+			enum Type
+			{
+				Int,
+				Float,
+				String,
+				Bool
+			}type;
+			void* address;
+
+			SerializeItem & operator=(const SerializeItem &item);
+			SerializeItem(const Type type, void* address);
+		};
+
 	private:
 		friend ObjectManager;
+		
 		// If you change this to true, the object will be removed
 		// !!! You should use the destroy() function instead
 		bool m_destroy;
 
+		// This is used in the serialization
+		const char *m_name;
+
 	protected:
 		friend ObjectReference;
+
 		// These values are assigned by the object reference class.
 		// Access to these members is not neccessarily, but could be useful
 		// for debugging purposes
@@ -76,6 +101,12 @@ namespace ax
 		// -1 means it is not yet activated
 		float m_timeTillDestroy = -1;
 
+		// Call this function in the constructor.
+		// The state of variables passed into this function
+		// will be serialized.
+		void addToSerialization(const char* name,
+			void* address, const SerializeItem::Type type);
+		
 	public:
 		// The type is used for the draw order.
 		// Entities are dependent upon the surface they're
@@ -101,8 +132,11 @@ namespace ax
 		// 0 makes the object be destroyed in the same frame
 		void destroy(float timeTillDestroy);
 
-		Object(ObjectFactory &objectFactory, const Type type);
+		std::unordered_map<std::string, SerializeItem> _m_serializeMap;
 
+		// Be sure that the name passed here is the same that is passed
+		// into the constructor. 
+		Object(ObjectFactory &objectFactory, const Type type, const char *name);
 		virtual ~Object();
 	};
 
@@ -110,11 +144,13 @@ namespace ax
 
 	// This class manages all the objects.
 	// Their lifetime, allocation and references.
+	// This is an internal class.
 	class ObjectManager
 	{
 	private:
 		std::vector<std::vector<Object*>> m_objects;
-
+		
+		ObjectFactory &m_objectFactory;
 	public:
 		// ObjectReference needs access to this member variable
 		// Object uses this variable to assign an unique id and 
@@ -136,7 +172,11 @@ namespace ax
 		// Destroy the objects that have to be destroyed
 		void _clear();
 
-		ObjectManager();
+		void _load(const std::vector<std::unordered_map<std::string, std::string>> &objectsState);
+
+		const std::vector<std::unordered_map<std::string, std::string>> _save() const;
+
+		ObjectManager(ObjectFactory & objectFactory);
 		~ObjectManager();
 	};
 
@@ -162,11 +202,40 @@ namespace ax
 		}
 
 		// Constructs an object.
-		Object* construct(const char* name)
+		ObjectReference construct(const char* name, const std::unordered_map<std::string, std::string> &data)
 		{
 			Object * object = m_map[name](*this);
 			_m_objectManager._add(object);
-			return object;
+			
+			for (const auto &variable : object->_m_serializeMap)
+			{
+				if (data.count(variable.first) == 0)
+				{
+					ax::Logger::log(5, std::string("Variable " + variable.first + " not added to serialization of object " + 
+						name).c_str(),"Axios",ax::Logger::WARNING,"Object Factory");
+					continue; // Maybe also log it
+				}
+
+				const std::string &value = data.at(variable.first);
+
+				switch (variable.second.type)
+				{
+				case Object::SerializeItem::Type::Int:
+					*static_cast<int*>(variable.second.address) = std::stoi(value);
+					break;
+				case Object::SerializeItem::Type::Float:
+					*static_cast<float*>(variable.second.address) = std::stof(value);
+					break;
+				case Object::SerializeItem::Type::String:
+					*static_cast<std::string*>(variable.second.address) = value;
+					break;
+				case Object::SerializeItem::Type::Bool:
+					*static_cast<bool*>(variable.second.address) = (std::stoi(value) == 0 ? false : true);
+					break;
+				}
+			}
+
+			return ObjectReference(object);
 		}
 
 		// This is public to make sure the object 
