@@ -64,6 +64,9 @@ void ax::Instance::start()
 		m_window.display();
     }
 
+	// TEMP (until a main menu scene or something has been added)
+	m_currentScene->onExit();
+
 	// Deinit phase
 	delete m_currentScene;
 	ax::DataManager::getInstance()._checkConfig(false);

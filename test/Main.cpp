@@ -12,12 +12,13 @@ class TempObject : public ax::Object
 {
 private:
 	std::string m_attack;
-
+	int m_damage;
 public:
 	TempObject(ax::ObjectFactory & objectFactory):
 		Object(objectFactory,Type::Hud,"temp")
 	{
 		addToSerialization("attack", &m_attack, SerializeItem::Type::String);
+		addToSerialization("damage", &m_damage, SerializeItem::Type::Int);
 	}
 
 	~TempObject()
@@ -31,15 +32,8 @@ class TempScene : public ax::Scene
 public:
 	virtual void onEnter() override final
 	{
-		m_objectFactory.add<TempObject>("temp");
-		std::unordered_map<std::string, std::string> map;
-		map["attack"] = "I am dashing";
-		m_objectFactory.construct("temp",map).get()->destroy(5);
-		map["attack"] = "I breath fire";
-		m_objectFactory.construct("temp",map).get()->destroy(10);
-		map["attack"] = "I explode!!!";
-		m_objectFactory.construct("temp",map).get()->destroy(15);
-		
+		m_objectFactory.add<TempObject>("temp");		
+
 		Scene::onEnter();
 	}
 

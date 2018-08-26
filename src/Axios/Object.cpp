@@ -62,7 +62,7 @@ void ax::ObjectManager::_clear()
 void ax::ObjectManager::_load(const std::vector<std::unordered_map<std::string, std::string>>& objectsState)
 {
 	for (const auto &data : objectsState)
-		m_objectFactory.construct(data.at("name").c_str(), data);
+		m_objectFactory.construct(data.at("name"), data);
 }
 
 const std::vector<std::unordered_map<std::string, std::string>> ax::ObjectManager::_save() const

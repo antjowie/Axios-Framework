@@ -7,15 +7,51 @@ void ax::Scene::onEnter()
 	setTitle(ax::DataManager::getInstance().getConfig("config", "title").c_str(), false);
 	updateUserConfig();
 
-//	// Load level data
-//	using json = nlohmann::json;
-//	std::ofstream file;
-//	if(file.open(m_filePath))
-	
+	// Load level data
+	using json = nlohmann::json;
+	std::ifstream file("save/" + m_filePath);
+	if (!file.is_open())
+	{
+		ax::Logger::log(5, std::string("Couldn't find save file for scene " + m_currentTitle).c_str(),
+			"Axios", ax::Logger::INFO, "Scene");
+		file.open(m_filePath);
+		if (!file.is_open())
+		{
+			ax::Logger::log(0, std::string("Couldn't find level file of scene. " + std::string(m_filePath) + " doesn't exist").c_str(),
+				"Axios", ax::Logger::MessageType::ERROR, "Scene");
+			return;
+		}
+	}
+
+	json data;
+	file >> data;
+	file.close();
+
+	std::vector<std::unordered_map<std::string, std::string>> objects;
+
+	for (json::iterator objectData = data.begin(); objectData != data.end(); ++objectData)
+	{
+		std::unordered_map<std::string, std::string> dataMap;
+		for (json::iterator key = objectData.value().begin(); key != objectData.value().end(); ++key)
+			dataMap[key.key()] = key.value().get<std::string>();
+		objects.push_back(dataMap);
+	}
+
+	m_objectManager._load(objects);
 }
 
 void ax::Scene::onExit()
 {
+	using json = nlohmann::json;
+	json data;
+	
+	for (const auto &object : m_objectManager._save())
+		data.push_back(object);
+
+	std::ofstream save("save/" + m_filePath);
+	
+	save << data.dump(2);
+	save.close();
 }
 
 void ax::Scene::_update(const double elapsedTime)

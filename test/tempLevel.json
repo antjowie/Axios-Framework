@@ -1,0 +1,20 @@
+[
+  {
+    "attack": "I am dashing",
+    "damage": "1",
+    "name": "temp",
+    "timeTillDestroy": "1.000000"
+  },
+  {
+    "attack": "I breath fire",
+    "damage": "3",
+    "name": "temp",
+    "timeTillDestroy": "2.000000"
+  },
+  {
+    "attack": "I explode!!!",
+    "damage": "5",
+    "name": "temp",
+    "timeTillDestroy": "30.000000"
+  }
+]

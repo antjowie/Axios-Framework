@@ -26,7 +26,7 @@ namespace ax
 	protected:
 		ax::ObjectFactory m_objectFactory;
 
-		const char *m_filePath;
+		std::string m_filePath;
 	
 	public:
 		// Change this from nullptr to swap the scene next frame

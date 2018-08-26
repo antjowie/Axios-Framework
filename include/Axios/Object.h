@@ -80,7 +80,7 @@ namespace ax
 		bool m_destroy;
 
 		// This is used in the serialization
-		const char *m_name;
+		std::string m_name;
 
 	protected:
 		friend ObjectReference;
@@ -192,17 +192,17 @@ namespace ax
 	{
 	private:
 		// This map contains all the constructor methods
-		std::unordered_map<const char*, Object* (*)(ObjectFactory&)> m_map;
+		std::unordered_map<std::string, Object* (*)(ObjectFactory&)> m_map;
 		
 	public:
 		template <class ObjectType>
-		void add(const char* name)
+		void add(const std::string &name)
 		{
 			m_map[name] = &_createObject<ObjectType>;
 		}
 
 		// Constructs an object.
-		ObjectReference construct(const char* name, const std::unordered_map<std::string, std::string> &data)
+		ObjectReference construct(const std::string &name, const std::unordered_map<std::string, std::string> &data)
 		{
 			Object * object = m_map[name](*this);
 			_m_objectManager._add(object);
